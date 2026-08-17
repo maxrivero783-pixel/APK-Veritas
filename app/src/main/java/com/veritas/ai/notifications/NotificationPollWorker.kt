@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
  * Architecture:
  * - Runs every 15 minutes (minimum WorkManager interval for periodic work)
  * - Sends device_id header so backend tracks active devices
- * - Uses ?since=<last_notification_id> for efficient delta polling
+ * - Uses ?since=<last_seq> for efficient delta polling (integer AUTOINCREMENT)
  * - Shows system notifications for each new item
  */
 class NotificationPollWorker(
@@ -30,7 +30,7 @@ class NotificationPollWorker(
         private const val BASE_URL = "https://veritas-ai.pages.dev"
         private const val PREFS_DEVICE = "veritas_device"
         private const val KEY_DEVICE_ID = "device_id"
-        private const val KEY_LAST_NOTIF_ID = "last_notif_id"
+        private const val KEY_LAST_NOTIF_SEQ = "last_notif_seq"
         private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val WORK_NAME = "veritas_notification_poll"
 
@@ -63,9 +63,14 @@ class NotificationPollWorker(
             }
         }
 
-        fun getLastNotifId(context: Context): String {
+        fun getLastNotifSeq(context: Context): Long {
             val prefs = context.getSharedPreferences(PREFS_DEVICE, Context.MODE_PRIVATE)
-            return prefs.getString(KEY_LAST_NOTIF_ID, "0") ?: "0"
+            return prefs.getLong(KEY_LAST_NOTIF_SEQ, 0L)
+        }
+
+        fun setLastNotifSeq(context: Context, seq: Long) {
+            val prefs = context.getSharedPreferences(PREFS_DEVICE, Context.MODE_PRIVATE)
+            prefs.edit().putLong(KEY_LAST_NOTIF_SEQ, seq).apply()
         }
 
         /**
@@ -175,8 +180,8 @@ class NotificationPollWorker(
 
         return try {
             val deviceId = getDeviceId(applicationContext)
-            val sinceId = getLastNotifId(applicationContext)
-            val url = "$BASE_URL/api/notifications/poll?since=$sinceId&limit=20"
+            val sinceSeq = getLastNotifSeq(applicationContext)
+            val url = "$BASE_URL/api/notifications/poll?since=$sinceSeq&limit=20"
 
             val conn = (URL(url).openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
@@ -198,13 +203,17 @@ class NotificationPollWorker(
             val json = JSONObject(body)
             val notifications = json.optJSONArray("notifications")
 
+            // Use last_seq from response if available, otherwise keep current cursor
+            val lastSeqFromServer = json.optLong("last_seq", sinceSeq)
+            if (lastSeqFromServer > sinceSeq) {
+                setLastNotifSeq(applicationContext, lastSeqFromServer)
+            }
+
             if (notifications != null && notifications.length() > 0) {
                 NotificationHelper.createNotificationChannels(applicationContext)
-                var lastId = sinceId
 
                 for (i in 0 until notifications.length()) {
                     val notif = notifications.getJSONObject(i)
-                    val id = notif.getString("id")
                     val title = notif.optString("title", "Veritas AI")
                     val bodyText = notif.optString("body", "")
                     val deepLink = notif.optString("deep_link", "").ifEmpty { null }
@@ -214,14 +223,7 @@ class NotificationPollWorker(
                     } else {
                         NotificationHelper.showNotification(applicationContext, title, bodyText, deepLink)
                     }
-
-                    // Track the highest ID for next poll
-                    if (id > lastId) lastId = id
                 }
-
-                // Persist last notification ID
-                val prefs = applicationContext.getSharedPreferences(PREFS_DEVICE, Context.MODE_PRIVATE)
-                prefs.edit().putString(KEY_LAST_NOTIF_ID, lastId).apply()
 
                 Log.d(TAG, "Delivered ${notifications.length()} notifications")
             }
