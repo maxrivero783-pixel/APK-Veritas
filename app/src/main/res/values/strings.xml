@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Veritas AI</string>
+    <string name="shortcut_new_chat">Nuevo chat</string>
+    <string name="shortcut_new_chat_long">Iniciar nuevo chat OSINT</string>
+    <string name="shortcut_settings">Ajustes</string>
+    <string name="shortcut_settings_long">Abrir ajustes de la app</string>
+    <string name="offline_banner">Sin conexion a Internet</string>
+    <string name="share_received_title">Compartido con Veritas</string>
+</resources>

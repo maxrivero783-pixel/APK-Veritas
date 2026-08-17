@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash theme (used briefly before Compose takes over) -->
+    <style name="Theme.VeritasSplash" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/veritas_primary</item>
+        <item name="android:navigationBarColor">@color/veritas_primary</item>
+        <item name="android:statusBarColor">@color/veritas_primary</item>
+    </style>
+
+    <!-- WebView activity theme -->
+    <style name="Theme.VeritasFullscreen" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Compose activities use this as a bridge theme -->
+    <style name="Theme.VeritasCompose" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/veritas_primary</item>
+        <item name="android:navigationBarColor">@color/veritas_primary</item>
+        <item name="android:statusBarColor">@color/veritas_primary</item>
+    </style>
+</resources>

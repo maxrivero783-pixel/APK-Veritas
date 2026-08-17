@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="veritas_primary">#0A0F1C</color>
+    <color name="veritas_accent">#50C878</color>
+    <color name="veritas_splash_bg">#0A0F1C</color>
+    <color name="veritas_surface">#111827</color>
+    <color name="veritas_surface_light">#1E293B</color>
+    <color name="veritas_text_primary">#E2E8F0</color>
+    <color name="veritas_text_secondary">#94A3B8</color>
+    <color name="veritas_text_muted">#64748B</color>
+    <color name="veritas_border">#2A3A5C</color>
+    <color name="veritas_error">#F87171</color>
+    <color name="veritas_warning">#FBBF24</color>
+    <color name="veritas_offline_bg">#1E293B</color>
+    <color name="veritas_offline_text">#FBBF24</color>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- New Chat -->
+    <shortcut
+        android:shortcutId="new_chat"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_new_chat"
+        android:shortcutLongLabel="@string/shortcut_new_chat_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.veritas.ai"
+            android:targetClass="com.veritas.ai.SplashActivity"
+            android:data="veritas://new-chat" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- Open Settings -->
+    <shortcut
+        android:shortcutId="settings"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_settings"
+        android:shortcutLongLabel="@string/shortcut_settings_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.veritas.ai"
+            android:targetClass="com.veritas.ai.SplashActivity"
+            android:data="veritas://settings" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

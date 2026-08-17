@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Camera captures -->
+    <external-files-path name="pictures" path="Pictures/" />
+    <!-- Internal cache for captured photos -->
+    <files-path name="captures" path="pictures/" />
+    <!-- Cache for shared files -->
+    <cache-path name="cache" path="." />
+</paths>
