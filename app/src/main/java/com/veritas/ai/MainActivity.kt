@@ -1,7 +1,9 @@
 package com.veritas.ai
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import android.net.Uri
@@ -15,7 +17,9 @@ import android.view.WindowManager
 import android.webkit.*
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -75,6 +79,11 @@ class MainActivity : AppCompatActivity() {
     // Compose state for overlays
     private var isOffline by mutableStateOf(false)
 
+    // Runtime permission launcher for POST_NOTIFICATIONS (Android 13+)
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* Result handled by system; channels already created */ }
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,6 +122,15 @@ class MainActivity : AppCompatActivity() {
         // Ensure notification channels exist and polling is running
         NotificationHelper.createNotificationChannels(this)
         lifecycleScope.launch { NotificationPollWorker.schedule(this@MainActivity) }
+
+        // Request POST_NOTIFICATIONS permission on Android 13+ (required for showing notifications)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
 
         // Fullscreen immersive
         setupImmersiveMode()
@@ -421,8 +439,12 @@ class MainActivity : AppCompatActivity() {
             @JavascriptInterface
             fun onWebLogout() {
                 runOnUiThread {
-                    auth.clearSession()
-                    redirectToLogin()
+                    lifecycleScope.launch {
+                        NotificationPollWorker.cancel(this@MainActivity)
+                        NotificationPollWorker.unregisterDevice(this@MainActivity)
+                        auth.clearSession()
+                        redirectToLogin()
+                    }
                 }
             }
         }, "AndroidBridge")
